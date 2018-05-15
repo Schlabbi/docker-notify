@@ -1,0 +1,15 @@
+{
+  "name": "docker-notify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "docker-hub-api": "^0.6.0",
+    "nodemailer": "^4.6.4"
+  }
+}

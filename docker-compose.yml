@@ -1,0 +1,7 @@
+version: '3'
+services:
+  docker-notify:
+    build: .
+    restart: always
+    env_file:
+     - ./config.env
