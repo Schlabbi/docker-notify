@@ -5,3 +5,5 @@ services:
     restart: always
     env_file:
      - ./config.env
+    volumes: 
+     - ./cache:/usr/src/app/cache
