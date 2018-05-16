@@ -142,4 +142,4 @@ let checkInterval = Number(process.env.checkInterval);
 
 checkForUpdates();
 
-setInterval(checkForUpdates, 1000 * 60 * checkInterval);
+setInterval(checkForUpdates, 1000 * 60 * (checkInterval || 60));
