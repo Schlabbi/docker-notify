@@ -7,7 +7,7 @@
     "start": "node ./src/index.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "docker-hub-api": "^0.6.0",
     "nodemailer": "^4.6.4"
