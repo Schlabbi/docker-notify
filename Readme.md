@@ -5,7 +5,7 @@ Docker-Notify can send you a mail when a Docker image gets updated.
 ## Setup
 
 1. Copy the `config.env.template` file into `config.env`
-* Fill out the `config.env` file:
+2. Fill out the `config.env` file:
  * The `updateRecheck` field represents the interval (in minutes) in which the repositories are checked for new versions
  * Fill out the fields for SMTP. This will give `Docker-Notify` access to a mail account to send the notification mails from.
  * Set the `mailReceiver` field to the mail address which should receive the notifications.
