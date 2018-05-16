@@ -21,7 +21,14 @@ class Cache {
                         reject(err);
                     }
                 } else {
-                    resolve(JSON.parse(data));                }
+                    try{
+                        let cache = JSON.parse(data);
+                        resolve(cache);
+                    } catch(e) {
+                        console.log("Cache is corrupted, recreate it");
+                        resolve({});
+                    }                
+                }
             });
         });
     }
