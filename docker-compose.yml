@@ -7,3 +7,4 @@ services:
      - ./config.env
     volumes: 
      - ./cache:/usr/src/app/cache
+     - $CONFIG_DIR/config.json:/usr/src/app/config.json
