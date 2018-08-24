@@ -1,0 +1,140 @@
+{
+    "title": "NotifyConfig",
+    "description": "The Config of docker-notify",
+    "type": "object",
+    "properties": {
+        "checkInterval": {
+            "description": "The interval checking for updates in Dockerhub",
+            "type": "integer",
+            "default": 60
+        },
+        "notifyServices": {
+            "type": "array",
+            "minItems": 1,
+            "description": "An array of notify-services",
+            "items": {
+                "description": "A notify service consists of an docker image and minimum one webhook/mailhook",
+                "type": "object",
+                "properties": {
+                    "image": {
+                        "description": "The imagename used by docker pull",
+                        "type": "string"
+                    },
+                    "actions": {
+                        "description": "The hooks, that are called after an update is available, can be web- or mailhooks",
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "object",
+                                    "description": "A webhook instance",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "enum": ["webHook"]
+                                        },
+                                        "instance": {
+                                            "type": "string",
+                                            "description": "A reference to a object in the list of webhooks (Reference to id)"
+                                        }
+                                    },
+                                    "required": ["type", "instance"]
+                                },{
+                                    "type": "object",
+                                    "description": "A mailhook instance",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "enum": ["mailHook"]
+                                        },
+                                        "instance": {
+                                            "type": "string",
+                                            "description": "A reference to a object in the list of mailhooks (Reference to id)"
+                                        },
+                                        "recipient": {
+                                            "type": "string",
+                                            "description": "The mailreciepeint"
+                                        }
+                                    },
+                                    "required": ["type", "instance", "recipient"]
+                            }]
+                        }
+                    }
+                },
+                "required": ["image", "actions"]
+            }
+        },
+        "smtpServer": {
+            "type": "object",
+            "properties": {
+                "^..*$": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "minLength": 5
+                        },
+                        "host": {
+                            "type": "string",
+                            "format": "hostname",
+                            "default": "127.0.0.1"
+                        },
+                        "port": {
+                            "type": "number",
+                            "min": 1,
+                            "max": 65535,
+                            "default": 25
+                        },
+                        "secure": {
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "sendername": {
+                            "type": "string",
+                            "minLength": 3
+                        },
+                        "senderadress": {
+                            "type": "string",
+                            "format": "email"
+                        },
+                        "username": {
+                            "type": "string"
+                        },
+                        "password": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["id"]
+                }
+            }
+        },
+        "webHooks": {
+            "type": "object",
+            "properties": {
+                "^..*$": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "minLength": 5
+                        },
+                        "reqUrl": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "httpMethod": {
+                            "type": "string",
+                            "enum": [
+                                "POST, GET, PUT, DELETE"
+                            ],
+                            "default": "POST"
+                        }
+                    },
+                    "required": ["id", "reqUrl"]
+                }
+            }
+        }
+    },
+    "required": [ "notifyServices" ]
+}

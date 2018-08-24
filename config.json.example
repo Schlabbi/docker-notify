@@ -1,0 +1,39 @@
+{
+    "notifyServices":[
+        {
+            "image": "nextcloud:fpm",
+            "actions": [
+                {
+                    "type": "mailHook",
+                    "instance": "generalMail",
+                    "recipient": "info@example.org"
+                }
+            ]
+        },
+        {
+            "image": "gitlab:latest",
+            "actions": [
+                {
+                    "type": "webHook",
+                    "instance": "gitlabHook"
+                }
+            ]
+        }
+    ],
+    "smtpServer": {
+        "generalMail": {
+            "host": "mail.example.org",
+            "port": 25,
+            "username": "docker-notify@example.org",
+            "password": "PASSWORD",
+            "senderName": "Docker-Notify",
+            "senderadress": "docker-notify@example.org"
+        }
+    },
+    "webHooks":{
+        "gitlabHook": {
+            "reqUrl": "ci.example.org",
+            "httpMethod": "POST"
+        }
+    }
+}

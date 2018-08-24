@@ -10,6 +10,8 @@
   "license": "MIT",
   "dependencies": {
     "docker-hub-api": "^0.6.0",
-    "nodemailer": "^4.6.4"
+    "nodemailer": "^4.6.4",
+    "request-promise-native": "^1.0.5",
+    "ajv": "^6.5.3"
   }
 }
