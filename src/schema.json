@@ -32,21 +32,29 @@
                                     "properties": {
                                         "type": {
                                             "type": "string",
-                                            "enum": ["webHook"]
+                                            "enum": [
+                                                "webHook"
+                                            ]
                                         },
                                         "instance": {
                                             "type": "string",
                                             "description": "A reference to a object in the list of webhooks (Reference to id)"
                                         }
                                     },
-                                    "required": ["type", "instance"]
-                                },{
+                                    "required": [
+                                        "type",
+                                        "instance"
+                                    ]
+                                },
+                                {
                                     "type": "object",
                                     "description": "A mailhook instance",
                                     "properties": {
                                         "type": {
                                             "type": "string",
-                                            "enum": ["mailHook"]
+                                            "enum": [
+                                                "mailHook"
+                                            ]
                                         },
                                         "instance": {
                                             "type": "string",
@@ -57,24 +65,28 @@
                                             "description": "The mailreciepeint"
                                         }
                                     },
-                                    "required": ["type", "instance", "recipient"]
-                            }]
+                                    "required": [
+                                        "type",
+                                        "instance",
+                                        "recipient"
+                                    ]
+                                }
+                            ]
                         }
                     }
                 },
-                "required": ["image", "actions"]
+                "required": [
+                    "image",
+                    "actions"
+                ]
             }
         },
         "smtpServer": {
             "type": "object",
-            "properties": {
+            "patternProperties": {
                 "^..*$": {
                     "type": "object",
                     "properties": {
-                        "id": {
-                            "type": "string",
-                            "minLength": 5
-                        },
                         "host": {
                             "type": "string",
                             "format": "hostname",
@@ -105,20 +117,17 @@
                             "type": "string"
                         }
                     },
-                    "required": ["id"]
+                    "additionalProperties": false
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "webHooks": {
             "type": "object",
-            "properties": {
+            "patternProperties": {
                 "^..*$": {
                     "type": "object",
                     "properties": {
-                        "id": {
-                            "type": "string",
-                            "minLength": 5
-                        },
                         "reqUrl": {
                             "type": "string",
                             "format": "uri"
@@ -126,15 +135,24 @@
                         "httpMethod": {
                             "type": "string",
                             "enum": [
-                                "POST, GET, PUT, DELETE"
+                                "POST",
+                                "GET",
+                                "PUT",
+                                "DELETE"
                             ],
                             "default": "POST"
                         }
                     },
-                    "required": ["id", "reqUrl"]
+                    "required": [
+                        "reqUrl"
+                    ],
+                    "additionalProperties": false
                 }
-            }
+            },
+            "additionalProperties": false
         }
     },
-    "required": [ "notifyServices" ]
+    "required": [
+        "notifyServices"
+    ]
 }
