@@ -4,14 +4,14 @@
     "type": "object",
     "properties": {
         "checkInterval": {
-            "description": "The interval checking for updates in Dockerhub",
+            "description": "The interval checking for updates in Dockerhub (in Minutes)",
             "type": "integer",
             "default": 60
         },
         "notifyServices": {
             "type": "array",
             "minItems": 1,
-            "description": "An array of notify-services",
+            "description": "An array of notify-services, specify here which images you want to be notified about",
             "items": {
                 "description": "A notify service consists of an docker image and minimum one webhook/mailhook",
                 "type": "object",
@@ -28,10 +28,11 @@
                             "anyOf": [
                                 {
                                     "type": "object",
-                                    "description": "A webhook instance",
+                                    "description": "A webhook instance consists of the reference in the webHooks Array and the type specified as webHook",
                                     "properties": {
                                         "type": {
                                             "type": "string",
+                                            "description": "As we are creating a webhook, this can only be webHook",
                                             "enum": [
                                                 "webHook"
                                             ]
@@ -44,14 +45,16 @@
                                     "required": [
                                         "type",
                                         "instance"
-                                    ]
+                                    ],
+                                    "additionalProperties": false
                                 },
                                 {
                                     "type": "object",
-                                    "description": "A mailhook instance",
+                                    "description": "A mailhook instance consists of the reference in the webHooks Array and the type specified as webHook. Als the recipient of the mail must be specified",
                                     "properties": {
                                         "type": {
                                             "type": "string",
+                                            "description": "As we are creating a mailhook, this can only be mailHook",
                                             "enum": [
                                                 "mailHook"
                                             ]
@@ -69,16 +72,19 @@
                                         "type",
                                         "instance",
                                         "recipient"
-                                    ]
+                                    ],
+                                    "additionalProperties": false
                                 }
                             ]
-                        }
+                        },
+                        "additionalProperties": false
                     }
                 },
                 "required": [
                     "image",
                     "actions"
-                ]
+                ],
+                "additionalProperties": false
             }
         },
         "smtpServer": {
@@ -154,5 +160,6 @@
     },
     "required": [
         "notifyServices"
-    ]
+    ],
+    "additionalProperties": false
 }
