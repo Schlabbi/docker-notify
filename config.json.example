@@ -12,7 +12,7 @@
             ]
         },
         {
-            "image": "gitlab:latest",
+            "image": "gitlab/gitlab-ce:latest",
             "actions": [
                 {
                     "type": "webHook",
