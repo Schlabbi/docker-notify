@@ -61,7 +61,7 @@ let mailHookSend = function(smtpserver, recipient, msg){
                 config.smtpServer[smtpserver].username, config.smtpServer[smtpserver].password))
     }
 
-    sendMail(msg, mailtransporterMap.get(smtpserver), config.smtpServer[smtpserver].senderName,
+    sendMail(msg, mailtransporterMap.get(smtpserver), config.smtpServer[smtpserver].sendername,
         config.smtpServer[smtpserver].senderadress, recipient);
 };
 
