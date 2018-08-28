@@ -85,13 +85,13 @@ The `config.json` looks like the following:
             "port": 25,
             "username": "docker-notify@example.org",
             "password": "PASSWORD",
-            "senderName": "Docker-Notify",
+            "sendername": "Docker-Notify",
             "senderadress": "docker-notify@example.org"
         }
     },
     "webHooks":{
         "gitlabHook": {
-            "reqUrl": "ci.example.org",
+            "reqUrl": "https://ci.example.org",
             "httpMethod": "POST"
         }
     }
