@@ -12,7 +12,7 @@ let config;
 try {
     config = require('./config.json')
 }
-catch (e) {
+catch(e) {
     console.error("Config file error, exiting");
     console.error(e.message);
     process.exit(1);
@@ -33,7 +33,7 @@ let notifyServices = config.notifyServices;
 //these things are: smtp-server referenced in notifyJob is existing and
 //webhooks referenced in notifyJob is existing
 if(!notifyServices.every(o => o.actions.every(o2 => o2.type === "webHook" ? config.webHooks[o2.instance] :
-    o2.type === "mailHook" ? config.smtpServer[o2.instance] : false))){
+        o2.type === "mailHook" ? config.smtpServer[o2.instance] : false))){
     console.error("Mail/Smtp Hooks that are referenced are not defined!");
     process.exit(3);
 }
@@ -113,7 +113,7 @@ let checkRepository = function(job, repoCache) {
             });
         };
 
-        repository = job.image;
+        let repository = job.image;
 
         if(repository.tag) {
             getTagInfo(repository.user, repository.name).then((tags) => {
@@ -121,7 +121,7 @@ let checkRepository = function(job, repoCache) {
                 tagInfo.user = repository.user;
                 tagInfo.name = repository.name;
                 checkUpdateDates(tagInfo);
-            });
+            }).catch(console.error);
         } else {
             getRepositoryInfo(repository.user, repository.name).then(checkUpdateDates).catch((err) => {
                 console.error("Error while fetching repo info: ", err);
