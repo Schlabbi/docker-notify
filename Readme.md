@@ -1,6 +1,6 @@
 # Docker-Notify
 
-Docker-Notify can send you a mail or calling a webhook when a Docker image gets updated.
+Docker-Notify can send you a mail or call a webhook when a Docker image gets updated.
 
 ## Variable Definitions
 * `$CONFIG_DIR` defines the directory where the config is stored
@@ -21,7 +21,7 @@ Docker-Notify can send you a mail or calling a webhook when a Docker image gets 
 Consider the following scenario: 
 You have a server with 2 software services. 
 One is a dockerized webserver and the other one is a dockerized nextcloud image with some customizations, so your `docker-compose.yml` is looking like this:
-```
+```yaml
 version: '3'
 services:
   webserver:
@@ -33,7 +33,7 @@ services:
 ```
 Now you want to be notified if you may update your apache2-server and you want to be notified if you must call your ci-pipeline to rebuild your custom nextcloud-docker-image.
 So, now your `docker-compose.yml` file is looking like this:
-```
+```yaml
 version: '3'
 services:
   webserver:
@@ -51,7 +51,7 @@ services:
 ```
 
 The `config.json` looks like the following:
-```
+```json
 {
     "notifyServices":[
         {
@@ -69,7 +69,7 @@ The `config.json` looks like the following:
             ]
         },
         {
-            "image": httpd",
+            "image": "httpd",
             "actions": [
                 {
                     "type": "mailHook",
