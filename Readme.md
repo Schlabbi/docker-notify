@@ -1,6 +1,8 @@
 # Docker-Notify
 
-Docker-Notify can send you a mail or call a webhook when a Docker image gets updated.
+Docker-Notify can send you a mail or call a webhook when a Docker image gets updated. 
+
+If you are trying to set docker-notify up on a SYnology, [here](Synology Readme.md) is a guide for that.
 
 ## Variable Definitions
 * `$CONFIG_DIR` defines the directory where the config is stored
