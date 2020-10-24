@@ -6,6 +6,28 @@ const Ajv = require('ajv');
 const ajv = new Ajv({allErrors: true, useDefaults: true});
 const rpn = require('request-promise-native');
 
+// Set up a minimal logger
+let dateFormatOptions = {
+    dateStyle: "medium", 
+    timeStyle: "long", 
+    hour12: false
+};
+
+let dateFormatter = new Intl.DateTimeFormat("en-US", dateFormatOptions);
+
+let logger = {
+    log: function() {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(dateFormatter.format(Date.now()) + ": ");
+        console.log.apply(console, args);
+    },
+    error: function() {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(dateFormatter.format(Date.now()) + ": ");
+        console.error.apply(console, args);
+    }
+}
+
 //Load config file
 let config;
 
@@ -13,8 +35,8 @@ try {
     config = require('./config.json')
 }
 catch(e) {
-    console.error("Config file error, exiting");
-    console.error(e.message);
+    logger.error("Config file error, exiting");
+    logger.error(e.message);
     process.exit(1);
 }
 
@@ -22,7 +44,7 @@ catch(e) {
 let validate = ajv.compile(schema);
 let valid = validate(config);
 if (!valid){
-    console.error(validate.errors);
+    logger.error(validate.errors);
     process.exit(2);
 }
 
@@ -37,7 +59,7 @@ dockerAPI.setCacheOptions({ enabled: false })
 //webhooks referenced in notifyJob is existing
 if(!notifyServices.every(o => o.actions.every(o2 => o2.type === "webHook" ? config.webHooks[o2.instance] :
         o2.type === "mailHook" ? config.smtpServer[o2.instance] : false))){
-    console.error("Mail/Smtp Hooks that are referenced are not defined!");
+    logger.error("Mail/Smtp Hooks that are referenced are not defined!");
     process.exit(3);
 }
 
@@ -78,12 +100,12 @@ let sendMail = function(msg, mailTransporter, smtpSenderName, smtpSenderAddress,
             text: msg
         };
         mailTransporter.sendMail(mailOptions).then((info) => {
-            console.log("Notification mail sent: ", info);
+            logger.log("Notification mail sent: ", info);
         }).catch((err) => {
-            console.error("Error while sending mail: ", err);
+            logger.error("Error while sending mail: ", err);
         });
     }).catch((err) => {
-        console.error("Error while verifying mail server connection: ", err);
+        logger.error("Error while verifying mail server connection: ", err);
     });
 };
 
@@ -124,10 +146,10 @@ let checkRepository = function(job, repoCache) {
                 tagInfo.user = repository.user;
                 tagInfo.name = repository.name;
                 checkUpdateDates(tagInfo);
-            }).catch(console.error);
+            }).catch(logger.error);
         } else {
             getRepositoryInfo(repository.user, repository.name).then(checkUpdateDates).catch((err) => {
-                console.error("Error while fetching repo info: ", err);
+                logger.error("Error while fetching repo info: ", err);
                 reject();
             });
         }
@@ -135,7 +157,7 @@ let checkRepository = function(job, repoCache) {
 };
 
 let checkForUpdates = function() {
-    console.log("Checking for updated repositories");
+    logger.log("Checking for updated repositories");
     Cache.getCache().then((cache) => {
         let repoChecks = [];
         for(let job of notifyServices) {
@@ -167,11 +189,11 @@ let checkForUpdates = function() {
 
                             rpn(options)
                                 .then(function (parsedBody) {
-                                    console.log("WebHook Action for image [" + JSON.stringify(o.job.image) + "] successfully");
+                                    logger.log("WebHook Action for image [" + JSON.stringify(o.job.image) + "] successfully");
                                 })
                                 .catch(function (err) {
-                                    console.error("WebHook Action for image [" + JSON.stringify(o.job.image) + "] failed");
-                                    console.log(err);
+                                    logger.error("WebHook Action for image [" + JSON.stringify(o.job.image) + "] failed");
+                                    logger.log(err);
                                 });
                         }
                         else if(o2.type == "mailHook"){
@@ -179,19 +201,19 @@ let checkForUpdates = function() {
                                 + JSON.stringify(o.job.image));
                         }
                         else{
-                            console.error("Trying to execute an unknown hook(" + o2.type + "), falling back to printing to console");
-                            console.error("Image: " + JSON.stringify(o.job.image));
+                            logger.error("Trying to execute an unknown hook(" + o2.type + "), falling back to printing to console");
+                            logger.error("Image: " + JSON.stringify(o.job.image));
                         }
                     }));
                 }
             }).catch((err) => {
-                console.error("Error while writing cache file: ", err);
+                logger.error("Error while writing cache file: ", err);
             })
         }).catch((err) => {
-            console.error("Error while checking for updates: ", err);
+            logger.error("Error while checking for updates: ", err);
         })
     }).catch((err) => {
-        console.error("Cannot open cache: ", err);
+        logger.error("Cannot open cache: ", err);
     });
 };
 
