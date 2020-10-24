@@ -9,8 +9,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "docker-hub-api": "^0.6.0",
-    "nodemailer": "^4.6.4",
+    "docker-hub-api": "^0.8.0",
+    "nodemailer": "^6.4.14",
     "request-promise-native": "^1.0.5",
     "ajv": "^6.5.3"
   }

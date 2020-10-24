@@ -29,6 +29,9 @@ if (!valid){
 //Prepare variables
 let notifyServices = config.notifyServices;
 
+// Disable the cache of the docker API wrapper
+dockerAPI.setCacheOptions({ enabled: false })
+
 //Validate things, that can currently not be validated by json schema
 //these things are: smtp-server referenced in notifyJob is existing and
 //webhooks referenced in notifyJob is existing
@@ -80,7 +83,7 @@ let sendMail = function(msg, mailTransporter, smtpSenderName, smtpSenderAddress,
             console.error("Error while sending mail: ", err);
         });
     }).catch((err) => {
-        console.error(err);
+        console.error("Error while verifying mail server connection: ", err);
     });
 };
 
@@ -192,7 +195,7 @@ let checkForUpdates = function() {
     });
 };
 
-let checkInterval = Number(process.env.checkInterval);
+let checkInterval = Number(config.checkInterval);
 
 checkForUpdates();
 
