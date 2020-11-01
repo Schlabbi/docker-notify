@@ -90,7 +90,7 @@ To update to the latest version of ```docker-notify``` container, go to the Dock
 1. Edit the existing container and change it's name to `docker-notify-old`.
 1. Go to the `Image` tab. 
 1. Delete that image. (Note Synology Docker may not let you delete the image if it is associated with a container. If that's the case, continue on to the next step.)
-1. Go to the `Registry` tab and find `schlabbi/docker-notify` by searching for `docker-notify`. Choose the same tag that you saw in the step above.
+1. Go to the `Registry` tab and find `schlabbi/docker-notify` by searching for `docker-notify`.
 ![Download the that Image](cache/images/download.png)
 
 1. When the image download is complete, go to the `Container` tab and select `docker-notify-old` then click `Settings` then `Duplicate settings`. 
