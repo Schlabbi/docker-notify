@@ -80,6 +80,10 @@ Click ```OK``` to save your advanced settings and then click ```Apply``` to star
 ![Network settings](cache/images/11Running.png)
 
 
+## 11. Check the logs
+Now select the docker-notify conainer and click on the `Deails` button and click on the `Logs` tab. That will show you a message like this that shows things are working. 
+![Environment variables](cache/images/12Log.png)
+
 # Updating ```docker-notify``` on Synology
 
 To update to the latest version of ```docker-notify``` container, go to the Docker app in Synology. 
