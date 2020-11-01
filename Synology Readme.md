@@ -71,9 +71,9 @@ Click the ```Network``` tab and check the box to ```Use the same network as Dock
 ![Network settings](cache/images/9network.png)
 
 ## 10. Configure Environment (optional).
-Click the ```Environment``` tab and add a new environment variable named `checkInterval`. The value of the `checkInterval` defines in hours, how often checks will be made for new container releases.
+Click the ```Environment``` tab and add a new environment variable named `TZ`. The value of the `TZ database` you can lookup yours [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). 
 
-![Environment variables](cache/images/10Enviornment.png)
+![Environment variables](cache/images/10Enviornment.png)	
 
 Click ```OK``` to save your advanced settings and then click ```Apply``` to start the [Schlabbi/docker-notify](https://github.com/Schlabbi/docker-notify) container.
 
