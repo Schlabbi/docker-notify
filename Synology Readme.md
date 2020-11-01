@@ -34,8 +34,6 @@ Open the Docker app on your Synology DSM, go to the `Registry` section and then 
 
 ![Download chlabbi/docker-notify docker image](cache/images/4Registry.png)
 
-Make sure you select the `latest` tag when you have the option. 
-
 
 ## 5. Create Container.
 When the container download is complete, launch a new container using the [chlabbi/docker-notify](https://github.com/Schlabbi/docker-notify) image.
@@ -90,7 +88,7 @@ To update to the latest version of ```docker-notify``` container, go to the Dock
 
 1. On the `Container` tab stop the existing docker-notify container (Select the container, then Action > Stop).
 1. Edit the existing container and change it's name to `docker-notify-old`.
-1. Go to the `Image` tab. Note the tag of the docker image you have been using. Probably `latest`. You will need to know this for the following steps.
+1. Go to the `Image` tab. 
 1. Delete that image. (Note Synology Docker may not let you delete the image if it is associated with a container. If that's the case, continue on to the next step.)
 1. Go to the `Registry` tab and find `schlabbi/docker-notify` by searching for `docker-notify`. Choose the same tag that you saw in the step above.
 ![Download the that Image](cache/images/download.png)
