@@ -1,4 +1,4 @@
-const dockerAPI = require('docker-hub-api');
+const dockerAPI = new (require("./DockerAPI").DockerAPI)();
 const mailService = require('./mailService');
 const Cache = require('./Cache');
 const schema = require('./schema.json');
@@ -50,9 +50,6 @@ if (!valid){
 
 //Prepare variables
 let notifyServices = config.notifyServices;
-
-// Disable the cache of the docker API wrapper
-dockerAPI.setCacheOptions({ enabled: false })
 
 //Validate things, that can currently not be validated by json schema
 //these things are: smtp-server referenced in notifyJob is existing and
@@ -121,6 +118,11 @@ let checkRepository = function(job, repoCache) {
     return new Promise((resolve, reject) => {
         
         let checkUpdateDates = function(repoInfo) {
+            if(!repoInfo) {
+                logger.error("Repository not found: ", repository.name);
+                return
+            }
+
             let updated;
             if(repoCache) {
                 let cachedDate = Date.parse(repoCache.lastUpdated);
@@ -143,6 +145,12 @@ let checkRepository = function(job, repoCache) {
         if(repository.tag) {
             getTagInfo(repository.user, repository.name).then((tags) => {
                 let tagInfo = tags.filter((elem) => elem.name == repository.tag)[0];
+
+                if(tagInfo == undefined) {
+                    logger.error("Cannot find tag for repository: ", repository.name);
+                    return;
+                }
+
                 tagInfo.user = repository.user;
                 tagInfo.name = repository.name;
                 checkUpdateDates(tagInfo);
