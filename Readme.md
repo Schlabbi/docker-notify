@@ -94,7 +94,11 @@ The `config.json` looks like the following:
     "webHooks":{
         "gitlabHook": {
             "reqUrl": "https://ci.example.org",
-            "httpMethod": "POST"
+            "httpMethod": "POST",
+            // This one is optional and will default to null.
+            "httpBody": {
+                "foo": [1, 2, 3]
+            }
         }
     }
 }
