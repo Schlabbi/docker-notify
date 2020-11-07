@@ -4,7 +4,7 @@ const Cache = require('./Cache');
 const schema = require('./schema.json');
 const Ajv = require('ajv');
 const ajv = new Ajv({allErrors: true, useDefaults: true});
-const rpn = require('request-promise-native');
+const axios = require("axios");
 
 // Set up a minimal logger
 let dateFormatOptions = {
@@ -195,14 +195,16 @@ let checkForUpdates = function() {
                             let webHook = config.webHooks[o2.instance];
                             let options = {method: webHook.httpMethod, uri: webHook.reqUrl};
 
-                            rpn(options)
-                                .then(function (parsedBody) {
-                                    logger.log("WebHook Action for image [" + JSON.stringify(o.job.image) + "] successfully");
-                                })
-                                .catch(function (err) {
-                                    logger.error("WebHook Action for image [" + JSON.stringify(o.job.image) + "] failed");
-                                    logger.log(err);
-                                });
+                            axios({
+                                method: webHook.httpMethod,
+                                url: webHook.reqUrl,
+                                data: webHook.httpBody
+                            }).then(function (body) {
+                                logger.log("WebHook Action for image [" + JSON.stringify(o.job.image) + "] successfully. Response: ", body);
+                            }).catch(function (err) {
+                                logger.error("WebHook Action for image [" + JSON.stringify(o.job.image) + "] failed");
+                                logger.log(err);
+                            });
                         }
                         else if(o2.type == "mailHook"){
                             mailHookSend(o2.instance, o2.recipient, "The following docker image was updated: "
@@ -216,10 +218,10 @@ let checkForUpdates = function() {
                 }
             }).catch((err) => {
                 logger.error("Error while writing cache file: ", err);
-            })
+            });
         }).catch((err) => {
             logger.error("Error while checking for updates: ", err);
-        })
+        });
     }).catch((err) => {
         logger.error("Cannot open cache: ", err);
     });

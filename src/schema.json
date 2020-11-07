@@ -147,6 +147,10 @@
                                 "DELETE"
                             ],
                             "default": "POST"
+                        },
+                        "httpBody": {
+                            "type": ["object", "null"],
+                            "default": null
                         }
                     },
                     "required": [
