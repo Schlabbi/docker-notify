@@ -53,7 +53,7 @@ services:
 ```
 
 The `config.json` looks like the following:
-```json
+```javascript
 {
     "notifyServices":[
         {
