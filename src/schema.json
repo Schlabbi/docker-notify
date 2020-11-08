@@ -149,7 +149,7 @@
                             "default": "POST"
                         },
                         "httpBody": {
-                            "type": ["object", "null"],
+                            "type": ["object", "null", "array", "string"],
                             "default": null
                         }
                     },
