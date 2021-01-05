@@ -32,7 +32,7 @@ let logger = {
 let config;
 
 try {
-    config = require('./config.json')
+    config = require('CONFIG_DIR/config.json')
 }
 catch(e) {
     logger.error("Config file error, exiting");
