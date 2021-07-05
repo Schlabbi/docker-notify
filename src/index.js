@@ -76,7 +76,7 @@ config.notifyServices.forEach(o => {
 
 let mailtransporterMap = new Map();
 
-let mailHookSend = function(smtpserver, recipient, msg){
+let mailHookSend = function(smtpserver, recipient, updatedString, msg){
     if(!mailtransporterMap.has(smtpserver)){
         mailtransporterMap.set(smtpserver,
             mailService(config.smtpServer[smtpserver].host, config.smtpServer[smtpserver].port, config.smtpServer[smtpserver].secure,
@@ -84,16 +84,16 @@ let mailHookSend = function(smtpserver, recipient, msg){
     }
 
     sendMail(msg, mailtransporterMap.get(smtpserver), config.smtpServer[smtpserver].sendername,
-        config.smtpServer[smtpserver].senderadress, recipient);
+        config.smtpServer[smtpserver].senderadress, recipient, updatedString);
 };
 
 //sends an email with a given message to the receiver which is defined in the env
-let sendMail = function(msg, mailTransporter, smtpSenderName, smtpSenderAddress, mailReceiver) {
+let sendMail = function(msg, mailTransporter, smtpSenderName, smtpSenderAddress, mailReceiver, updatedString) {
     mailTransporter.verify().then(() => {
         let mailOptions = {
             from: '"' + smtpSenderName + '" <' + smtpSenderAddress + '>',
             to: mailReceiver,
-            subject: "Docker image updated",
+            subject: "Docker image '" + updatedString + "' updated",
             text: msg
         };
         mailTransporter.sendMail(mailOptions).then((info) => {
@@ -225,8 +225,8 @@ let checkForUpdates = function() {
                             });
                         }
                         else if(o2.type == "mailHook"){
-                            mailHookSend(o2.instance, o2.recipient, "The following docker image was updated: "
-                                + JSON.stringify(o.job.image));
+                            mailHookSend(o2.instance, o2.recipient, o.updatedString, "Docker image '" + o.updatedString + "' was updated:\n"
+                                + JSON.stringify(o.job.image, null, 2));
                         }
                         else{
                             logger.error("Trying to execute an unknown hook(" + o2.type + "), falling back to printing to console");
