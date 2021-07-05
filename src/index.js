@@ -8,8 +8,8 @@ const axios = require("axios");
 
 // Set up a minimal logger
 let dateFormatOptions = {
-    dateStyle: "medium", 
-    timeStyle: "long", 
+    dateStyle: "medium",
+    timeStyle: "long",
     hour12: false
 };
 
@@ -116,8 +116,8 @@ let getTagInfo = function(user, name) {
 
 let checkRepository = function(job, repoCache) {
     return new Promise((resolve, reject) => {
-        
-        let checkUpdateDates = function(repoInfo) {
+
+        let checkUpdateDates = function(repoInfo, tag) {
             if(!repoInfo) {
                 logger.error("Repository not found: ", repository.name);
                 return
@@ -129,12 +129,13 @@ let checkRepository = function(job, repoCache) {
                 let currentDate = Date.parse(repoInfo.last_updated);
                 updated = cachedDate < currentDate;
             } else {
-                updated = false; 
+                updated = false;
             }
             resolve({
                 lastUpdated: repoInfo.last_updated,
                 name: repoInfo.name,
                 user: repoInfo.user,
+                tag: tag ? tag : null,
                 updated: updated,
                 job: job
             });
@@ -153,7 +154,7 @@ let checkRepository = function(job, repoCache) {
 
                 tagInfo.user = repository.user;
                 tagInfo.name = repository.name;
-                checkUpdateDates(tagInfo);
+                checkUpdateDates(tagInfo, repository.tag);
             }).catch(logger.error);
         } else {
             getRepositoryInfo(repository.user, repository.name).then(checkUpdateDates).catch((err) => {
@@ -169,19 +170,36 @@ let checkForUpdates = function() {
     Cache.getCache().then((cache) => {
         let repoChecks = [];
         for(let job of notifyServices) {
-            repoChecks.push(checkRepository(job, cache[job.image.user + "/" + job.image.name]));
+            let key = job.image.user + "/" + job.image.name;
+            if (job.image.tag) {
+              key += ':' + job.image.tag
+            }
+            logger.log("Checking: ", key);
+            repoChecks.push(checkRepository(job, cache[key]));
         }
         Promise.all(repoChecks).then((checkResult) => {
             let newCache = {};
             let updatedRepos = [];
             for(let res of checkResult) {
-                newCache[res.user + "/" + res.name] = {
-                    user: res.user,
-                    name: res.name,
-                    lastUpdated: res.lastUpdated
+                let key = res.user + "/" + res.name;
+                let cacheObj = {
+                  user: res.user,
+                  name: res.name,
+                  lastUpdated: res.lastUpdated
                 };
+
+                if (res.tag) {
+                    key += ':' + res.tag
+                    cacheObj.tag = res.tag
+                }
+
+                newCache[key] = cacheObj;
+
                 if(res.updated) {
                     let updatedString = res.user == "library" ? res.name : res.user + "/" + res.name;
+                    if (res.tag) {
+                      updatedString += ':' + res.tag
+                    }
                     updatedRepos.push({
                         job: res.job,
                         updatedString: updatedString
