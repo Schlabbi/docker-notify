@@ -11,6 +11,6 @@
   "dependencies": {
     "ajv": "^6.5.3",
     "axios": "^0.21.4",
-    "nodemailer": "^6.4.14"
+    "nodemailer": "^6.4.16"
   }
 }
