@@ -148,6 +148,10 @@
                             ],
                             "default": "POST"
                         },
+                        "httpHeaders": {
+                            "type": ["object", "null", "array", "string"],
+                            "default": null
+                        },
                         "httpBody": {
                             "type": ["object", "null", "array", "string"],
                             "default": null

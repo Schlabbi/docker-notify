@@ -211,11 +211,11 @@ let checkForUpdates = function() {
                     updatedRepos.forEach(o => o.job.actions.forEach(o2 => {
                         if(o2.type == "webHook"){
                             let webHook = config.webHooks[o2.instance];
-                            let options = {method: webHook.httpMethod, uri: webHook.reqUrl};
 
                             axios({
                                 method: webHook.httpMethod,
                                 url: webHook.reqUrl,
+                                headers: webHook.httpHeaders,
                                 data: webHook.httpBody
                             }).then(function (body) {
                                 logger.log("WebHook Action for image [" + JSON.stringify(o.job.image) + "] successfully. Response: ", body);
