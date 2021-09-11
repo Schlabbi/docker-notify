@@ -45,7 +45,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,8 +56,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            tonyrl/docker-notify
-            ghcr.io/tonyrl/docker-notify
+            ${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: latest=true
 
       # Build and push Docker image with Buildx (don't push on PR)
@@ -67,7 +67,5 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-            tonyrl/docker-notify
-            ghcr.io/tonyrl/docker-notify
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
