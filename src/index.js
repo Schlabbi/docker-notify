@@ -4,7 +4,7 @@ const Cache = require('./Cache');
 const schema = require('./schema.json');
 const Ajv = require('ajv');
 const addFormats = require("ajv-formats")
-const ajv = new Ajv({allErrors: true, useDefaults: true});
+const ajv = new Ajv({allErrors: true, allowUnionTypes: true, useDefaults: true});
 const axios = require("axios");
 addFormats(ajv, ["email", "hostname", "uri"])
 

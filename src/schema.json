@@ -22,7 +22,7 @@
                     },
                     "actions": {
                         "description": "The hooks, that are called after an update is available, can be web- or mailhooks",
-                        "type": "array",
+                        "type": ["array", "object"],
                         "minItems": 1,
                         "items": {
                             "anyOf": [
@@ -100,8 +100,8 @@
                         },
                         "port": {
                             "type": "number",
-                            "min": 1,
-                            "max": 65535,
+                            "minimum": 1,
+                            "maximum": 65535,
                             "default": 25
                         },
                         "secure": {
