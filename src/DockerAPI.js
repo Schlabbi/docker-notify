@@ -1,11 +1,11 @@
-const axios = require("axios");
+const axios = require('axios');
 
 class DockerAPI {
 
     repository(user, name) {
         user = user.toLowerCase();
 
-        let path = `/v2/repositories/${user}/${name}`;
+        const path = `/v2/repositories/${user}/${name}`;
 
         return this.request(path);
     }
@@ -13,29 +13,29 @@ class DockerAPI {
     tags(user, name) {
         user = user.toLowerCase();
 
-        let path = `/v2/repositories/${user}/${name}/tags`;
+        const path = `/v2/repositories/${user}/${name}/tags`;
 
         return this.requestAllPages(path);
     }
 
     requestAllPages(path) {
-        let pageSize = 100;
+        const pageSize = 100;
 
         return new Promise((resolve, reject) => {
             this.request(path, 1, pageSize).then((firstPageResult) => {
-                let totalElementCount = firstPageResult.count;
-                let maxPage = Math.ceil(totalElementCount / pageSize);
+                const totalElementCount = firstPageResult.count;
+                const maxPage = Math.ceil(totalElementCount / pageSize);
 
-                var promises = [];
+                const promises = [];
 
-                for(let i = 2; i <= maxPage; i++) {
+                for (let i = 2; i <= maxPage; i++) {
                     promises.push(this.request(path, i, pageSize));
                 }
 
                 Promise.all(promises).then((subsequentResults) => {
                     subsequentResults.push(firstPageResult);
                     // Extract the results from each of the requests
-                    let elementArray = subsequentResults.flatMap((result) => result.results);
+                    const elementArray = subsequentResults.flatMap((result) => result.results);
 
                     resolve(elementArray);
                 }).catch((error) => {
@@ -48,14 +48,14 @@ class DockerAPI {
     }
 
     request(path, page, pageSize) {
-        let url = `https://hub.docker.com${path}`
-        
-        if(page && pageSize) {
-            url += `?page_size=${pageSize}&page=${page}`
+        let url = `https://hub.docker.com${path}`;
+
+        if (page && pageSize) {
+            url += `?page_size=${pageSize}&page=${page}`;
         }
 
         return axios({
-            method: "GET",
+            method: 'GET',
             url: url
         }).then((res) => res.data);
     }
