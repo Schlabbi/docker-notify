@@ -213,6 +213,10 @@ const checkForUpdates = function () {
                     updatedRepos.forEach((o) => o.job.actions.forEach((o2) => {
                         if (o2.type == 'webHook'){
                             const webHook = config.webHooks[o2.instance];
+                            const message = webHook.httpBody;
+                            Object.keys(message).forEach(function(key) {
+                                message[key] = message[key].replace("$msg", 'Docker image \'' + o.updatedString + '\' was updated:\n' + JSON.stringify(o.job.image));
+                            })
 
                             axios({
                                 method: webHook.httpMethod,
