@@ -74,6 +74,28 @@
                                         "recipient"
                                     ],
                                     "additionalProperties": false
+                                },
+                                {
+                                    "type": "object",
+                                    "description": "A twitter instance consists of the reference in the twitter Array and the type specified as twitter",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "description": "As we are creating a twitter API instance, this can only be twitter",
+                                            "enum": [
+                                                "twitter"
+                                            ]
+                                        },
+                                        "instance": {
+                                            "type": "string",
+                                            "description": "A reference to a object in the list of webhooks (Reference to id)"
+                                        }
+                                    },
+                                    "required": [
+                                        "type",
+                                        "instance"
+                                    ],
+                                    "additionalProperties": false
                                 }
                             ]
                         },
@@ -159,6 +181,44 @@
                     },
                     "required": [
                         "reqUrl"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "twitter": {
+            "type": "object",
+            "patternProperties": {
+                "^..*$": {
+                    "type": "object",
+                    "properties": {
+                        "appKey": {
+                            "type": "string",
+                            "minLength": 10
+                        },
+                        "appSecret": {
+                            "type": "string",
+                            "minLength": 20
+                        },
+                        "accessToken": {
+                            "type": "string",
+                            "minLength": 10
+                        },
+                        "accessSecret": {
+                            "type": "string",
+                            "minLength": 20
+                        },
+                        "message": {
+                            "type": "string",
+                            "default": "$msg"
+                        }
+                    },
+                    "required": [
+                        "appKey",
+                        "appSecret",
+                        "accessToken",
+                        "accessSecret"
                     ],
                     "additionalProperties": false
                 }
