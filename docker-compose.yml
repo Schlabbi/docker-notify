@@ -1,7 +1,7 @@
 version: '3'
 services:
   docker-notify:
-    image: tonyrl/docker-notify
+    image: schlabbi/docker-notify
     restart: always
     volumes: 
       - $CONFIG_DIR/cache:/usr/src/app/cache
