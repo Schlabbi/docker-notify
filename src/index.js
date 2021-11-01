@@ -214,9 +214,9 @@ const checkForUpdates = function () {
                         if (o2.type == 'webHook'){
                             const webHook = config.webHooks[o2.instance];
                             const message = webHook.httpBody;
-                            Object.keys(message).forEach(function(key) {
-                                message[key] = message[key].replace("$msg", 'Docker image \'' + o.updatedString + '\' was updated:\n' + JSON.stringify(o.job.image));
-                            })
+                            Object.keys(message).forEach((key) => {
+                                message[key] = message[key].replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated:\n' + JSON.stringify(o.job.image));
+                            });
 
                             axios({
                                 method: webHook.httpMethod,
