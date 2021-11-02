@@ -1,10 +1,11 @@
 const dockerAPI = new (require('./DockerAPI').DockerAPI)();
+const { TwitterApi } = require('twitter-api-v2');
 const mailService = require('./mailService');
 const Cache = require('./Cache');
 const schema = require('./schema.json');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
-const ajv = new Ajv({allErrors: true, allowUnionTypes: true, useDefaults: true});
+const ajv = new Ajv({ allErrors: true, allowUnionTypes: true, useDefaults: true });
 const axios = require('axios');
 addFormats(ajv, ['email', 'hostname', 'uri']);
 
@@ -45,7 +46,7 @@ catch (e) {
 // Validate config file with schema validator
 const validate = ajv.compile(schema);
 const valid = validate(config);
-if (!valid){
+if (!valid) {
     logger.error(validate.errors);
     process.exit(2);
 }
@@ -57,8 +58,8 @@ const notifyServices = config.notifyServices;
 // these things are: smtp-server referenced in notifyJob is existing and
 // webhooks referenced in notifyJob is existing
 if (!notifyServices.every((o) => o.actions.every((o2) => o2.type === 'webHook' ? config.webHooks[o2.instance] :
-    o2.type === 'mailHook' ? config.smtpServer[o2.instance] : false))){
-    logger.error('Mail/Smtp Hooks that are referenced are not defined!');
+    o2.type === 'mailHook' ? config.smtpServer[o2.instance] : o2.type === 'twitter' ? config.twitter[o2.instance] : false))) {
+    logger.error('Mail/Smtp/twitter Hooks that are referenced are not defined!');
     process.exit(3);
 }
 
@@ -69,7 +70,7 @@ config.notifyServices.forEach((o) => {
     res.user = elem.length > 1 ? elem[0] : 'library';
     res.name = elem.length > 1 ? elem[1] : elem[0];
     // get tag if it is set
-    if (res.name.split(':').length > 1){
+    if (res.name.split(':').length > 1) {
         res.tag = res.name.split(':')[1];
         res.name = res.name.split(':')[0];
     }
@@ -78,8 +79,8 @@ config.notifyServices.forEach((o) => {
 
 const mailtransporterMap = new Map();
 
-const mailHookSend = function (smtpserver, recipient, updatedString, msg){
-    if (!mailtransporterMap.has(smtpserver)){
+const mailHookSend = function (smtpserver, recipient, updatedString, msg) {
+    if (!mailtransporterMap.has(smtpserver)) {
         mailtransporterMap.set(smtpserver,
             mailService(config.smtpServer[smtpserver].host, config.smtpServer[smtpserver].port, config.smtpServer[smtpserver].secure,
                 config.smtpServer[smtpserver].username, config.smtpServer[smtpserver].password));
@@ -211,9 +212,10 @@ const checkForUpdates = function () {
             Cache.writeCache(JSON.stringify(newCache)).then(() => {
                 if (updatedRepos.length > 0) {
                     updatedRepos.forEach((o) => o.job.actions.forEach((o2) => {
-                        if (o2.type == 'webHook'){
+                        if (o2.type == 'webHook') {
                             const webHook = config.webHooks[o2.instance];
                             const message = webHook.httpBody;
+
                             Object.keys(message).forEach((key) => {
                                 if (typeof message[key] == 'string') {
                                     message[key] = message[key].replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated:\n' + JSON.stringify(o.job.image));
@@ -232,9 +234,32 @@ const checkForUpdates = function () {
                                 logger.log(err);
                             });
                         }
-                        else if (o2.type == 'mailHook'){
+                        else if (o2.type == 'mailHook') {
                             mailHookSend(o2.instance, o2.recipient, o.updatedString, 'Docker image \'' + o.updatedString + '\' was updated:\n'
                                 + JSON.stringify(o.job.image, null, 2));
+                        }
+                        else if (o2.type == 'twitter') {
+                            const twitter = config.twitter[o2.instance];
+                            logger.log('docker object: ', o);
+                            logger.log('twitter config: ', twitter)
+                            const twitterClient = new TwitterApi({
+                                appKey: twitter.appKey,
+                                appSecret: twitter.appSecret,
+                                accessToken: twitter.accessToken,
+                                accessSecret: twitter.accessSecret,
+                            });
+                            
+                            (async () => {
+                                try {
+                                    message = twitter.message.replace("$msg", 'Docker image \'' + o.updatedString + '\' was updated');
+                                    logger.log('tweet: ', message);
+                                    const res = await twitterClient.v1.tweet(message);
+                                    logger.log('res: ', res);
+                                } catch (err) {
+                                    logger.error('tweet error: ', err)
+                                    logger.error('tweet error: ', err.data.errors.message)
+                                }
+                            })();
                         }
                         else {
                             logger.error('Trying to execute an unknown hook(' + o2.type + '), falling back to printing to console');

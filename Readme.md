@@ -15,6 +15,7 @@ The following notification destinations are supported:
 | ---------- | --------------------------------------------------------------------------------- |
 | smtpServer | email                                                                             |
 | webHooks   | Webhook, the $msg variable can be used to insert the docker-notify update message |
+| twitter    | twitter API, $msg variable can be used for tweet text                             |
 
 ## Setup
 
@@ -117,6 +118,15 @@ The `config.json` looks like the following:
                 "text": "$msg"
             }
         }
-    }
+    },
+    "twitter": {
+        "rasaAlerts": {
+            "appKey": "your_app_api_key",
+            "appSecret": "your_app_api_secret",
+            "accessToken": "your_app_access_token",
+            "accessSecret": "your_app_access_secret",
+            "message": "$msg"
+        }
+    },
 }
 ```
