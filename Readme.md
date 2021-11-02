@@ -4,8 +4,17 @@ Docker-Notify can send you a mail or call a webhook when a Docker image gets upd
 
 If you are trying to set docker-notify up on a Synology, [here](Synology%20Readme.md) is a guide for that.
 
-## Variable Definitions
+## Environment Variables
 * `$CONFIG_DIR` defines the directory where the config is stored
+
+## Notification Destinations
+
+The following notification destinations are supported:
+
+| Type       | Description                                                                       |
+| ---------- | --------------------------------------------------------------------------------- |
+| smtpServer | email                                                                             |
+| webHooks   | Webhook, the $msg variable can be used to insert the docker-notify update message |
 
 ## Setup
 
@@ -98,6 +107,14 @@ The `config.json` looks like the following:
             // This one is optional and will default to null.
             "httpBody": {
                 "foo": [1, 2, 3]
+            }
+        },
+        "slackHook": {
+            "reqUrl": "https://hooks.slack.com/services/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w",
+            "httpMethod": "POST",
+            "httpHeaders": {"Content-type": "application/json"},
+            "httpBody": {
+                "text": "$msg"
             }
         }
     }
