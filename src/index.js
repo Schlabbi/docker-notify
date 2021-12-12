@@ -217,7 +217,7 @@ const checkForUpdates = function () {
                             const message = webHook.httpBody;
                             Object.keys(message).forEach((key) => {
                                 if (typeof message[key] == 'string') {
-                                    message[key] = message[key].replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated:\n' + JSON.stringify(o.job.image));
+                                    message[key] = message[key].replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated:\nhttps://hub.docker.com/r/' + o.updatedString.split(":")[0] + '/tags');
                                 }
                             });
 
@@ -235,7 +235,7 @@ const checkForUpdates = function () {
                         }
                         else if (o2.type == 'mailHook'){
                             mailHookSend(o2.instance, o2.recipient, o.updatedString, 'Docker image \'' + o.updatedString + '\' was updated:\n'
-                                + JSON.stringify(o.job.image, null, 2));
+                                + 'https://hub.docker.com/r/' + o.updatedString.split(":")[0] + '/tags');
                         }
                         else if (o2.type == 'twitter') {
                             const twitter = config.twitter[o2.instance];
@@ -250,7 +250,7 @@ const checkForUpdates = function () {
                             
                             (async () => {
                                 try {
-                                    message = twitter.message.replace("$msg", 'Docker image \'' + o.updatedString + '\' was updated');
+                                    message = twitter.message.replace("$msg", 'Docker image \'' + o.updatedString + '\' was updated, https://hub.docker.com/r/' + o.updatedString.split(":")[0] + '/tags');
                                     logger.log('tweet: ', message);
                                     const res = await twitterClient.v1.tweet(message);
                                     logger.log('res: ', res);
