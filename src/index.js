@@ -265,7 +265,7 @@ const checkForUpdates = function () {
                             const message = webHook.httpBody;
                             Object.keys(message).forEach((key) => {
                                 if (typeof message[key] == 'string') {
-                                    message[key] = message[key].replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated:\nhttps://hub.docker.com/r/' + o.updatedString.split(":")[0] + '/tags');
+                                    message[key] = message[key].replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated:\nhttps://hub.docker.com/r/' + o.updatedString.split(':')[0] + '/tags');
                                 }
                             });
 
@@ -283,28 +283,24 @@ const checkForUpdates = function () {
                         }
                         else if (o2.type == 'mailHook'){
                             mailHookSend(o2.instance, o2.recipient, o.updatedString, 'Docker image \'' + o.updatedString + '\' was updated:\n'
-                                + 'https://hub.docker.com/r/' + o.updatedString.split(":")[0] + '/tags');
+                                + 'https://hub.docker.com/r/' + o.updatedString.split(':')[0] + '/tags');
                         }
                         else if (o2.type == 'twitter') {
                             const twitter = config.twitter[o2.instance];
-                            logger.log('docker object: ', o);
-                            logger.log('twitter config: ', twitter)
                             const twitterClient = new TwitterApi({
                                 appKey: twitter.appKey,
                                 appSecret: twitter.appSecret,
                                 accessToken: twitter.accessToken,
                                 accessSecret: twitter.accessSecret,
                             });
-                            
+
                             (async () => {
                                 try {
-                                    message = twitter.message.replace("$msg", 'Docker image \'' + o.updatedString + '\' was updated, https://hub.docker.com/r/' + o.updatedString.split(":")[0] + '/tags');
-                                    logger.log('tweet: ', message);
-                                    const res = await twitterClient.v1.tweet(message);
-                                    logger.log('res: ', res);
+                                    const message = twitter.message.replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated');
+                                    await twitterClient.v1.tweet(message);
                                 } catch (err) {
-                                    logger.error('tweet error: ', err)
-                                    logger.error('tweet error: ', err.data.errors.message)
+                                    logger.error('tweet error: ', err);
+                                    logger.error('tweet error: ', err.data.errors.message);
                                 }
                             })();
                         }
