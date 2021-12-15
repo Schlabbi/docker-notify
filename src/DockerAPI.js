@@ -18,6 +18,14 @@ class DockerAPI {
         return this.requestAllPages(path);
     }
 
+    tagsLastUpdated(user, name) {
+        user = user.toLowerCase();
+
+        const path = `/v2/repositories/${user}/${name}/tags?ordering=last_updated&page=1&page_size=50`;
+
+        return this.requestAllPages(path);
+    }
+
     requestAllPages(path) {
         const pageSize = 100;
 

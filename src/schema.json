@@ -20,6 +20,14 @@
                         "description": "The imagename used by docker pull",
                         "type": "string"
                     },
+                    "findVersion": {
+                        "description": "Search for verstion tag with with the same digest value",
+                        "type": "boolean"
+                    },
+                    "versionMatch": {
+                        "description": "Javascript RegEx that the version tag must match",
+                        "type": "string"
+                    },
                     "actions": {
                         "description": "The hooks, that are called after an update is available, can be web- or mailhooks",
                         "type": ["array", "object"],

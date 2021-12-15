@@ -113,6 +113,10 @@ const getRepositoryInfo = function (user, name) {
     return dockerAPI.repository(user, name);
 };
 
+const getTagsLastUpdated = function (user, name) {
+    return dockerAPI.tagsLastUpdated(user, name);
+};
+
 const getTagInfo = function (user, name) {
     return dockerAPI.tags(user, name);
 };
@@ -120,7 +124,7 @@ const getTagInfo = function (user, name) {
 const checkRepository = function (job, repoCache) {
     return new Promise((resolve, reject) => {
 
-        const checkUpdateDates = function (repoInfo, tag) {
+        const checkUpdateDates = function (repoInfo, tag, findVersion, versionMatch) {
             if (!repoInfo) {
                 logger.error('Repository not found: ', repository.name);
                 return;
@@ -131,17 +135,59 @@ const checkRepository = function (job, repoCache) {
                 const cachedDate = Date.parse(repoCache.lastUpdated);
                 const currentDate = Date.parse(repoInfo.last_updated);
                 updated = cachedDate < currentDate;
+                // If findVersion then we need to lookup recent images
+                if (findVersion) {
+                    getTagsLastUpdated(repository.user, repository.name).then((r) => {
+                        latest = r.find(o => o.name ==='latest');
+                        digest = latest?.images[0].digest;
+                        matching = r.filter(o => o.images[0].digest === digest)
+                        versionName = '';
+                        if (matching.length > 1) {
+                            versionName = matching.filter(o => o.name != "latest")[0].name;
+                            if (versionMatch) {
+                                var re = new RegExp(versionMatch);
+                                // If we have a versionName filter then it must pass the filter
+                                if (!re.test(versionName)) {
+                                    versionName = ''
+                                }
+                            }
+                        }
+                        resolve({
+                            lastUpdated: repoInfo.last_updated,
+                            name: repoInfo.name,
+                            user: repoInfo.user,
+                            tag: tag ? tag : null,
+                            versionTag: versionName ? versionName : null,
+                            updated: updated,
+                            job: job
+                        });
+                }).catch((err) => {
+                        logger.error('Error while fetching repo info: ', err);
+                        reject();
+                    });
+                } else {
+                    // don't care about findVersion
+                    resolve({
+                        lastUpdated: repoInfo.last_updated,
+                        name: repoInfo.name,
+                        user: repoInfo.user,
+                        tag: tag ? tag : null,
+                        updated: updated,
+                        job: job
+                    });
+                }
             } else {
+                // no repoCache
                 updated = false;
+                resolve({
+                    lastUpdated: repoInfo.last_updated,
+                    name: repoInfo.name,
+                    user: repoInfo.user,
+                    tag: tag ? tag : null,
+                    updated: updated,
+                    job: job
+                });
             }
-            resolve({
-                lastUpdated: repoInfo.last_updated,
-                name: repoInfo.name,
-                user: repoInfo.user,
-                tag: tag ? tag : null,
-                updated: updated,
-                job: job
-            });
         };
 
         const repository = job.image;
@@ -157,7 +203,7 @@ const checkRepository = function (job, repoCache) {
 
                 tagInfo.user = repository.user;
                 tagInfo.name = repository.name;
-                checkUpdateDates(tagInfo, repository.tag);
+                checkUpdateDates(tagInfo, repository.tag, job.findVersion, job.versionMatch);
             }).catch(logger.error);
         } else {
             getRepositoryInfo(repository.user, repository.name).then(checkUpdateDates).catch((err) => {
@@ -200,7 +246,9 @@ const checkForUpdates = function () {
 
                 if (res.updated) {
                     let updatedString = res.user == 'library' ? res.name : res.user + '/' + res.name;
-                    if (res.tag) {
+                    if (res.versionTag) {
+                        updatedString += ':' + res.versionTag;
+                    } else if (res.tag) {
                         updatedString += ':' + res.tag;
                     }
                     updatedRepos.push({
