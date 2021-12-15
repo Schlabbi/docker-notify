@@ -1,6 +1,6 @@
 {
   "name": "docker-notify",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,8 @@
     "ajv": "^8.6.3",
     "ajv-formats": "^2.1.1",
     "axios": "^0.24.0",
-    "nodemailer": "^6.7.0"
+    "nodemailer": "^6.7.0",
+    "twitter-api-v2": "^1.6.4"
   },
   "devDependencies": {
     "eslint": "^7.32.0",

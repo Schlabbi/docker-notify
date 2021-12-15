@@ -1,4 +1,5 @@
 const dockerAPI = new (require('./DockerAPI').DockerAPI)();
+const { TwitterApi } = require('twitter-api-v2');
 const mailService = require('./mailService');
 const Cache = require('./Cache');
 const schema = require('./schema.json');
@@ -57,8 +58,8 @@ const notifyServices = config.notifyServices;
 // these things are: smtp-server referenced in notifyJob is existing and
 // webhooks referenced in notifyJob is existing
 if (!notifyServices.every((o) => o.actions.every((o2) => o2.type === 'webHook' ? config.webHooks[o2.instance] :
-    o2.type === 'mailHook' ? config.smtpServer[o2.instance] : false))){
-    logger.error('Mail/Smtp Hooks that are referenced are not defined!');
+    o2.type === 'mailHook' ? config.smtpServer[o2.instance] : o2.type === 'twitter' ? config.twitter[o2.instance] : false))) {
+    logger.error('Mail/Smtp/twitter Hooks that are referenced are not defined!');
     process.exit(3);
 }
 
@@ -112,6 +113,10 @@ const getRepositoryInfo = function (user, name) {
     return dockerAPI.repository(user, name);
 };
 
+const getTagsLastUpdated = function (user, name) {
+    return dockerAPI.tagsLastUpdated(user, name);
+};
+
 const getTagInfo = function (user, name) {
     return dockerAPI.tags(user, name);
 };
@@ -119,7 +124,7 @@ const getTagInfo = function (user, name) {
 const checkRepository = function (job, repoCache) {
     return new Promise((resolve, reject) => {
 
-        const checkUpdateDates = function (repoInfo, tag) {
+        const checkUpdateDates = function (repoInfo, tag, findVersion, versionMatch) {
             if (!repoInfo) {
                 logger.error('Repository not found: ', repository.name);
                 return;
@@ -130,17 +135,59 @@ const checkRepository = function (job, repoCache) {
                 const cachedDate = Date.parse(repoCache.lastUpdated);
                 const currentDate = Date.parse(repoInfo.last_updated);
                 updated = cachedDate < currentDate;
+                // If findVersion then we need to lookup recent images
+                if (findVersion) {
+                    getTagsLastUpdated(repository.user, repository.name).then((r) => {
+                        let versionName = '';
+                        const latest = r.find((o) => o.name ==='latest');
+                        const digest = latest?.images[0].digest;
+                        const matching = r.filter((o) => o.images[0].digest === digest);
+                        if (matching.length > 1) {
+                            versionName = matching.filter((o) => o.name != 'latest')[0].name;
+                            if (versionMatch) {
+                                const re = new RegExp(versionMatch);
+                                // If we have a versionName filter then it must pass the filter
+                                if (!re.test(versionName)) {
+                                    versionName = '';
+                                }
+                            }
+                        }
+                        resolve({
+                            lastUpdated: repoInfo.last_updated,
+                            name: repoInfo.name,
+                            user: repoInfo.user,
+                            tag: tag ? tag : null,
+                            versionTag: versionName ? versionName : null,
+                            updated: updated,
+                            job: job
+                        });
+                    }).catch((err) => {
+                        logger.error('Error while fetching repo info: ', err);
+                        reject();
+                    });
+                } else {
+                    // don't care about findVersion
+                    resolve({
+                        lastUpdated: repoInfo.last_updated,
+                        name: repoInfo.name,
+                        user: repoInfo.user,
+                        tag: tag ? tag : null,
+                        updated: updated,
+                        job: job
+                    });
+                }
             } else {
+                // no repoCache
                 updated = false;
+                resolve({
+                    lastUpdated: repoInfo.last_updated,
+                    name: repoInfo.name,
+                    user: repoInfo.user,
+                    tag: tag ? tag : null,
+                    updated: updated,
+                    job: job
+                });
             }
-            resolve({
-                lastUpdated: repoInfo.last_updated,
-                name: repoInfo.name,
-                user: repoInfo.user,
-                tag: tag ? tag : null,
-                updated: updated,
-                job: job
-            });
         };
 
         const repository = job.image;
@@ -156,7 +203,7 @@ const checkRepository = function (job, repoCache) {
 
                 tagInfo.user = repository.user;
                 tagInfo.name = repository.name;
-                checkUpdateDates(tagInfo, repository.tag);
+                checkUpdateDates(tagInfo, repository.tag, job.findVersion, job.versionMatch);
             }).catch(logger.error);
         } else {
             getRepositoryInfo(repository.user, repository.name).then(checkUpdateDates).catch((err) => {
@@ -199,7 +246,9 @@ const checkForUpdates = function () {
 
                 if (res.updated) {
                     let updatedString = res.user == 'library' ? res.name : res.user + '/' + res.name;
-                    if (res.tag) {
+                    if (res.versionTag) {
+                        updatedString += ':' + res.versionTag;
+                    } else if (res.tag) {
                         updatedString += ':' + res.tag;
                     }
                     updatedRepos.push({
@@ -216,7 +265,7 @@ const checkForUpdates = function () {
                             const message = webHook.httpBody;
                             Object.keys(message).forEach((key) => {
                                 if (typeof message[key] == 'string') {
-                                    message[key] = message[key].replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated:\n' + JSON.stringify(o.job.image));
+                                    message[key] = message[key].replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated:\nhttps://hub.docker.com/r/' + o.updatedString.split(':')[0] + '/tags');
                                 }
                             });
 
@@ -234,7 +283,26 @@ const checkForUpdates = function () {
                         }
                         else if (o2.type == 'mailHook'){
                             mailHookSend(o2.instance, o2.recipient, o.updatedString, 'Docker image \'' + o.updatedString + '\' was updated:\n'
-                                + JSON.stringify(o.job.image, null, 2));
+                                + 'https://hub.docker.com/r/' + o.updatedString.split(':')[0] + '/tags');
+                        }
+                        else if (o2.type == 'twitter') {
+                            const twitter = config.twitter[o2.instance];
+                            const twitterClient = new TwitterApi({
+                                appKey: twitter.appKey,
+                                appSecret: twitter.appSecret,
+                                accessToken: twitter.accessToken,
+                                accessSecret: twitter.accessSecret,
+                            });
+
+                            (async () => {
+                                try {
+                                    const message = twitter.message.replace('$msg', 'Docker image \'' + o.updatedString + '\' was updated');
+                                    await twitterClient.v1.tweet(message);
+                                } catch (err) {
+                                    logger.error('tweet error: ', err);
+                                    logger.error('tweet error: ', err.data.errors.message);
+                                }
+                            })();
                         }
                         else {
                             logger.error('Trying to execute an unknown hook(' + o2.type + '), falling back to printing to console');
