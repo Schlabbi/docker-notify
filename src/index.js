@@ -138,17 +138,17 @@ const checkRepository = function (job, repoCache) {
                 // If findVersion then we need to lookup recent images
                 if (findVersion) {
                     getTagsLastUpdated(repository.user, repository.name).then((r) => {
-                        latest = r.find(o => o.name ==='latest');
-                        digest = latest?.images[0].digest;
-                        matching = r.filter(o => o.images[0].digest === digest)
-                        versionName = '';
+                        let versionName = '';
+                        const latest = r.find((o) => o.name ==='latest');
+                        const digest = latest?.images[0].digest;
+                        const matching = r.filter((o) => o.images[0].digest === digest);
                         if (matching.length > 1) {
-                            versionName = matching.filter(o => o.name != "latest")[0].name;
+                            versionName = matching.filter((o) => o.name != 'latest')[0].name;
                             if (versionMatch) {
-                                var re = new RegExp(versionMatch);
+                                const re = new RegExp(versionMatch);
                                 // If we have a versionName filter then it must pass the filter
                                 if (!re.test(versionName)) {
-                                    versionName = ''
+                                    versionName = '';
                                 }
                             }
                         }
@@ -161,7 +161,7 @@ const checkRepository = function (job, repoCache) {
                             updated: updated,
                             job: job
                         });
-                }).catch((err) => {
+                    }).catch((err) => {
                         logger.error('Error while fetching repo info: ', err);
                         reject();
                     });
