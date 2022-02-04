@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "ajv": "^8.6.3",
+    "ajv": "^8.10.0",
     "ajv-formats": "^2.1.1",
     "axios": "^0.24.0",
     "nodemailer": "^6.7.0"
